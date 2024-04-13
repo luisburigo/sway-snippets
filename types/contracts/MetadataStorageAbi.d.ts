@@ -22,23 +22,26 @@ import type {
   StdString,
 } from 'fuels';
 
-import type { Vec } from "./common";
-
-export type MetadataInput = { key: Bytes, value: Bytes };
+export type MetadataInput = { key: StdString, value: StdString };
 export type MetadataOutput = MetadataInput;
+export type MetadataInputInput = { key: StdString, value: StdString };
+export type MetadataInputOutput = MetadataInputInput;
 export type RawBytesInput = { ptr: BigNumberish, cap: BigNumberish };
 export type RawBytesOutput = { ptr: BN, cap: BN };
 
 interface MetadataStorageAbiInterface extends Interface {
   functions: {
     add: FunctionFragment;
+    add_meta_key: FunctionFragment;
     get_all: FunctionFragment;
   };
 
   encodeFunctionData(functionFragment: 'add', values: [StdString, MetadataInput]): Uint8Array;
+  encodeFunctionData(functionFragment: 'add_meta_key', values: [MetadataInputInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'get_all', values: [StdString]): Uint8Array;
 
   decodeFunctionData(functionFragment: 'add', data: BytesLike): DecodedValue;
+  decodeFunctionData(functionFragment: 'add_meta_key', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'get_all', data: BytesLike): DecodedValue;
 }
 
@@ -46,6 +49,7 @@ export class MetadataStorageAbi extends Contract {
   interface: MetadataStorageAbiInterface;
   functions: {
     add: InvokeFunction<[username: StdString, metadata: MetadataInput], void>;
-    get_all: InvokeFunction<[username: StdString], Vec<MetadataOutput>>;
+    add_meta_key: InvokeFunction<[metadata: MetadataInputInput], void>;
+    get_all: InvokeFunction<[username: StdString], Bytes>;
   };
 }

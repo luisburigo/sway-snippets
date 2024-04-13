@@ -8,20 +8,36 @@ use std::{
     storage::storage_vec::*,
     storage::storage_key::*,
     storage::storage_bytes::*,
+    storage::storage_string::*,
+    storage::storable_slice::*,
+    bytes_conversions::u16::*,
+    primitive_conversions::u64::*,
 };
 
+struct MetadataInput {
+    key: String,
+    value: String,
+}
+
 struct Metadata {
+    key: String,
+    value: String,
+}
+
+struct MetadataOutput {
     key: Bytes,
     value: Bytes,
-    // metadata_type: Bytes,
 }
 
 abi MetadataBytesContract {
+    #[storage(write)]
+    fn add_meta_key(metadata: MetadataInput);
+
     #[storage(read, write)]
     fn add(username: String, metadata: Metadata);
 
     #[storage(read)]
-    fn get_all(username: String) -> Vec<Metadata>;
+    fn get_all(username: String) -> Bytes;
 }
 
 //// 
@@ -39,87 +55,72 @@ abi MetadataBytesContract {
 //     -> sha256(username, key)
 
 storage {
-    // sha256(username, key): Bytes(matadata value)
-    metadata_values: StorageMap<b256, StorageBytes> = StorageMap {},
+    metadata_values: StorageMap<b256, StorageString> = StorageMap::<b256, StorageString> {},
+    metadata_keys: StorageVec<StorageString> = StorageVec {},
+    // metadata_types: StorageMap<b256, StorageString> = StorageVec {},
 
+    // metadata_keys: StorageMap<b256, StorageString> = StorageMap::<b256, StorageString> {},
     // sha256(username): [Bytes()]
-    metadata_keys: StorageMap<b256, StorageVec<StorageBytes>> = StorageMap {},
+    
+    // metadata_keys: StorageMap<b256, StorageVec<StorageBytes>> = StorageMap {},
 
-    // Bytes(metadata type)
-    metadata_types: StorageVec<StorageBytes> = StorageVec {},
+    // // Bytes(metadata type)
+    
 }
 
-fn create_metadata_key(username: Bytes, key: Bytes) -> b256 {
-    return sha256((username, key));
+#[storage(read)]
+fn create_metadata_key(username: String, key: String) -> b256 {
+    return sha256((Bytes::from(username.as_raw_slice()), Bytes::from(key.as_raw_slice())));
 }
 
 impl MetadataBytesContract for Contract {
+    #[storage(write)]
+    fn add_meta_key(metadata: MetadataInput) {
+        storage.metadata_keys.push(StorageString {});
+        let keys_len = storage.metadata_keys.len();
+        storage.metadata_keys.get(keys_len - 1).unwrap().write_slice(metadata.key);
+    }
+
     #[storage(read, write)]
     fn add(username: String, metadata: Metadata) {
-        // let metadata_key = create_metadata_key(username.into(), metadata.key);
-        let metadata_key = sha256(1u8);
-
-        log(metadata_key);
-        log(storage.metadata_values.get(metadata_key).try_read().is_some());
-        storage.metadata_values.insert(metadata_key, StorageBytes {});
-        storage.metadata_values.get(metadata_key).write_slice(metadata.value);
-
-        // Check values has inserted
-        // let metadata_value = storage.metadata_values.get(metadata_key).try_read();
-
-        // match metadata_value {
-        //     Some(_) => {
-        //         log(1);
-        //         // Update metadata value
-        //         storage.metadata_values.get(metadata_key).write_slice(metadata.value);
-        //     },
-        //     None => {
-        //         log(2);
-        //         // Start storage of values
-        //         storage.metadata_values.insert(metadata_key, StorageBytes {});
-
-        //         // Write metadata value
-        //         storage.metadata_values.get(metadata_key).write_slice(metadata.value);
-
-        //         // Try start storage of keys
-        //         let user_hash = sha256(username);
-        //         storage.metadata_keys.try_insert(user_hash, StorageVec {});
-        //         storage.metadata_keys.get(user_hash).push(StorageBytes {});
-        //         let storage_key = storage.metadata_keys.get(user_hash).last().unwrap();
-        //         storage_key.write_slice(metadata.key);
-        //     },
-        // }
+        let metadata_values_key = create_metadata_key(username, metadata.key);
+        log(metadata_values_key);
+        let key_of_string = storage.metadata_values.get(metadata_values_key);
+        key_of_string.write_slice(metadata.value);
+        log(key_of_string.read_slice().is_some());
     }
 
     #[storage(read)]
-    fn get_all(username: String) -> Vec<Metadata> {
-        // let metadata_keys = storage.metadata_keys.get(sha256(username));
-        let metadata_key = sha256(1u8);
-        let metadata_value = storage.metadata_values.get(metadata_key).try_read();
+    fn get_all(username: String) -> Bytes {
+        let mut metadata_bytes = Bytes::new();
 
-        match metadata_value {
-            Some(value) => {
-                let mut vec = Vec::new();
-                vec.push(Metadata {
-                    key: Bytes::new(),
-                    value: Bytes::new(),
-                });
-                return vec;
-            },
-            None => {
-                log(2);
-                return Vec::new();
-            },
+        let mut i = 0;
+        log(storage.metadata_keys.len());
+        while i < storage.metadata_keys.len() {
+            match storage.metadata_keys.get(i) {
+                Option::Some(metadata_index) => {
+                    let metadata_key = metadata_index.read_slice().unwrap();
+                    let metadata_values_key = create_metadata_key(username, metadata_key);
+                    log(metadata_values_key);
+                    let value_slice = storage.metadata_values.get(metadata_values_key).read_slice();
+
+                    match value_slice {
+                        Some(value) => {
+                            let key_bytes = metadata_key.as_bytes();
+                            let value_bytes = value.as_bytes();
+                            metadata_bytes.append(key_bytes.len().try_as_u16().unwrap().to_be_bytes());
+                            metadata_bytes.append(key_bytes);
+                            metadata_bytes.append(value_bytes.len().try_as_u16().unwrap().to_be_bytes());
+                            metadata_bytes.append(value_bytes);
+                        },
+                        _ => (),
+                    }
+                },
+                Option::None => (),
+            }
+            i += 1;
         }
-        
 
-        let mut metadata_vec = Vec::new();
-        // let mut count = 0;
-
-        // while count < metadata_keys.len() {
-            
-        // }
-
-        return metadata_vec;
+        return metadata_bytes;
     }
 }
