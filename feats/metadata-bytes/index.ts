@@ -49,7 +49,7 @@ async function saveAsBytes() {
           throw new Error('Array must contain exactly 2 bytes');
         }
         return (byteArray[0] << 8) + byteArray[1];
-      }
+    }
 
     const userMetadataList = await metadataStorageAbi.functions.get_all("aaaa").txParams(txParams).call();
 

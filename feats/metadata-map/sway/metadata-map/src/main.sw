@@ -19,10 +19,11 @@ abi MetadataStorage {
     fn get(handle_name: String, key: String) -> String;
 
     #[storage(read)]
-    fn get_last() -> String;
-
-    #[storage(read)]
     fn get_all() -> Vec<String>;
+
+    // TODO: remove
+    #[storage(read)]
+    fn get_last() -> String;
 }
 
 storage {
@@ -80,13 +81,6 @@ impl MetadataStorage for Contract {
         }
     */
 
-    #[storage(read)]
-    fn get_last() -> String {
-        let metadata_key = storage.metadata_keys.last().unwrap().read_slice();
-
-        return metadata_key.unwrap_or(String::new());
-    }
-
     /*
         Not working:
         Vec of strings in fuels-ts dispatch a error (_FuelError: Invalid u64 data size.)
@@ -102,5 +96,13 @@ impl MetadataStorage for Contract {
         }
 
         return metadata_keys;
+    }
+
+    // TODO: remove
+    #[storage(read)]
+    fn get_last() -> String {
+        let metadata_key = storage.metadata_keys.last().unwrap().read_slice();
+
+        return metadata_key.unwrap_or(String::new());
     }
 }
