@@ -26,7 +26,8 @@ metadata_values: StorageMap<b256, StorageString> = StorageMap {},
 ## Problems
 
 ### Get all metadata keys
-Neste metodo deveria ser possivel retornar um vetor de todos os metadata_keys, porem o `fuels-ts` o decode acaba retornando erro.
+In this method, it should be possible to return a vector of all the metadata_keys, however, the `fuels-ts` decode ends 
+up returning an error.
 
 #### Sway
 ```sway
