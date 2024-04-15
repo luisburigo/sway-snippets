@@ -21,7 +21,7 @@ metadata_values: StorageMap<b256, StorageString> = StorageMap {},
 - ✅ `add(metadata_key: String)` - Add a metadata key to the metadata_keys
 - ✅ `add_metadata(handle_name: String, key: String, value: String)` - Add the metadata value of the user.
 - ✅ `get(handle_name: String, key: String) -> String` - Get the metadata value of the user.
-- 🚫 `get_all() -> Vec<String>` - Get all metadata keys.
+- [🚫 `get_all() -> Vec<String>` - Get all metadata keys.](#get-all-metadata-keys)
 
 ## Problems
 
