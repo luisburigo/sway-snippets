@@ -1,5 +1,5 @@
 {
-  "name": "test-metadata",
+  "name": "metadata-bytes",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -8,5 +8,11 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "fuels": "^0.79.0"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2"
+  }
 }

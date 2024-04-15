@@ -1,5 +1,5 @@
 .idea
 node_modules
-out
+feats/metadata-bytes/sway/metadata-storage/out
 Forc.lock
 .DS_Store

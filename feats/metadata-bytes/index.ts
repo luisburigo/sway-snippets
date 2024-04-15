@@ -7,7 +7,6 @@ import {
 } from "fuels";
 import {MetadataStorageAbi__factory} from "./types";
 import {metadataStorage} from "./types/contract-ids.json";
-import {toUtf8String} from "ethers";
 
 const getContract = async () => {
     const provider = await Provider.create('http://localhost:4000/graphql');
@@ -16,8 +15,6 @@ const getContract = async () => {
 
     return {metadataStorageAbi, wallet, provider};
 }
-
-
 
 const asciiStrBytes = (value: string) => value.split('').map(a => a.charCodeAt(0));
 const strBytesAscii = (bytes: number[]) => bytes.map(a => String.fromCharCode(a)).join('');
@@ -29,17 +26,17 @@ async function saveAsBytes() {
         gasPrice: 1,
         gasLimit: 1_000_000,
     };
-    // const addMetadataKeyResult = await metadataStorageAbi.functions.add_meta_key({
-    //     key: "foo1",
-    //     value: "bar1",
-    // }).txParams(txParams).call();
+    const addMetadataKeyResult = await metadataStorageAbi.functions.add_meta_key({
+        key: "foo2",
+        value: "bar3",
+    }).txParams(txParams).call();
 
     // console.log(addMetadataKeyResult.logs);
 
-    // const addMetadataResult = await metadataStorageAbi.functions.add("aaaa", {
-    //     key: "foo1",
-    //     value: "bar1",
-    // }).txParams(txParams).call();
+    const addMetadataResult = await metadataStorageAbi.functions.add("aaaa", {
+        key: "foo2",
+        value: "bar3",
+    }).txParams(txParams).call();
     // console.log(addMetadataResult.logs);
 
     // 0xfa62818059ef1c45b55ee44a76dfdfd17e2bd9d33c3ff33ef0532e9a28a863e2
@@ -69,7 +66,6 @@ async function saveAsBytes() {
             if (index >= bytes.length) return;
             const [key, offset] = decode(bytes, index);
             const [value, offset2] = decode(bytes, offset);
-            console.log(key, value);
             metdata[key] = value;
             _decodeMetadata(bytes, offset2);
         }
