@@ -20,25 +20,18 @@ const KEY_LIST = 0x58c02a1cb3dfa824be1fbcca886a75d519fe83b77d6f1de863e1218574277
 // Pre computed sha256("VALUE")
 const VALUE = 0x8ec121c93e4a0de65f26e1500cb501e383531efb2c2ca9ec1d457478d6d3627b;
 
-// A persistent storage type to metadata.
-pub struct StorageMetadata {}
-
-// METHODS:
-// insert -> receive the user handle name, the metadata key and the metadata value.
-//           storage.metadata.insert('handle_name', 'meta_key', 'meta_value');
-
 // Hash identifier for the metadata key.
-pub fn hash_key(field_id: b256, user_meta_key: b256) -> b256 {
+fn _metadata_key_id(field_id: b256, user_meta_key: b256) -> b256 {
     return sha256((field_id, KEY, user_meta_key));
 }
 
 // Hash identifier for the value of the metadata. 
-pub fn hash_key_value(field_id: b256, user_meta_key: b256) -> b256 {
+fn _metadata_value_id(field_id: b256, user_meta_key: b256) -> b256 {
     return sha256((field_id, VALUE, user_meta_key));
 }
 
 // Hash identifier for the list of metadata keys.
-pub fn hash_key_list(field_id: b256, user: b256) -> b256 {
+fn _metadata_list_id(field_id: b256, user: b256) -> b256 {
     return sha256((field_id, KEY_LIST, user));
 }
 
@@ -75,75 +68,62 @@ pub fn load_user_metadata_list(field_id: b256) -> Vec<b256> {
 }
 
 #[storage(read)]
-pub fn load_metadata_key(field_id: b256) -> String {
+pub fn load_metadata_field_id(field_id: b256) -> String {
     match read_slice(field_id) {
         Some(slice) => String::from(slice),
         None => String::new(),
     }
 }
 
-#[storage(read)]
-pub fn load_metadata_value(field_id: b256) -> String {
-    match read_slice(field_id) {
-        Some(slice) => String::from(slice),
-        None => String::new(),
-    }
-}
+// A persistent storage type to metadata.
+pub struct StorageMetadata {}
 
 impl StorageKey<StorageMetadata> {
-    // Insert method:
-    //
-    // # Arguments
-    // * `handle_name`: String - The owner of metadata.
-    // * `metadata`: Bytes - The metadata to be stored.
-    //
     #[storage(read, write)]
     pub fn insert(self, handle_name: String, key: String, value: String) {
-        let user_hash = sha256(handle_name);
-        let user_metadata_key_hash = sha256((user_hash, key));
+        let user_id = sha256(handle_name);
+        let user_metadata_key_id = sha256((user_id, key));
+        let metadata_value_id = _metadata_value_id(self.field_id, user_metadata_key_id);
+        let metadata_key_id = _metadata_key_id(self.field_id, user_metadata_key_id);
         
-        let metadata_value_hash = hash_key_value(self.field_id, user_metadata_key_hash);
-        write_slice(metadata_value_hash, value.as_bytes().as_raw_slice());
+        write_slice(metadata_value_id, value.as_bytes().as_raw_slice());
         
-        let metadata_key_hash = hash_key(self.field_id, user_metadata_key_hash);
-        
-        match read_slice(metadata_key_hash) {
+        match read_slice(metadata_key_id) {
             Some(_) => (),
             None => {
-                write_slice(metadata_key_hash, key.as_bytes().as_raw_slice());
-                let metadata_list_hash = hash_key_list(self.field_id, user_hash);
-                store_user_metadata_list(metadata_list_hash, metadata_key_hash);
+                write_slice(metadata_key_id, key.as_bytes().as_raw_slice());
+                let metadata_list_id = _metadata_list_id(self.field_id, user_id);
+                store_user_metadata_list(metadata_list_id, metadata_key_id);
             }
         }
     }
-    
 
     #[storage(read)]
     pub fn get(self, handle_name: String, key: String) -> String {
-        let user_hash = sha256(handle_name);
-        let user_metadata_key_hash = sha256((user_hash, key));
-        let metadata_value_hash = hash_key_value(self.field_id, user_metadata_key_hash);
+        let user_id = sha256(handle_name);
+        let user_metadata_key_id = sha256((user_id, key));
+        let metadata_value_id = _metadata_value_id(self.field_id, user_metadata_key_id);
         
-        return load_metadata_key(metadata_value_hash);
+        return load_metadata_field_id(metadata_value_id);
     }
 
     #[storage(read)]
     pub fn get_all(self, handle_name: String) -> Vec<String> {
-        let user_hash = sha256(handle_name);
-        let metadata_list_hash = hash_key_list(self.field_id, user_hash);
+        let user_id = sha256(handle_name);
+        let metadata_list_id = _metadata_list_id(self.field_id, user_id);
         
-        let metadata_keys = load_user_metadata_list(metadata_list_hash);
+        let metadata_ids = load_user_metadata_list(metadata_list_id);
         let mut metadata_values: Vec<String> = Vec::new();
 
         let mut i = 0;
-        while i < metadata_keys.len() {
-            let metdata_key = load_metadata_key(metadata_keys.get(i).unwrap());
+        while i < metadata_ids.len() {
+            let metdata_key = load_metadata_field_id(metadata_ids.get(i).unwrap());
+
+            let user_metadata_key_hash = sha256((user_id, metdata_key));
+            let metadata_value_hash = _metadata_value_id(self.field_id, user_metadata_key_hash);
+            let metadata_value = load_metadata_field_id(metadata_value_hash);
+
             metadata_values.push(metdata_key);
-
-            let user_metadata_key_hash = sha256((user_hash, metdata_key));
-            let metadata_value_hash = hash_key_value(self.field_id, user_metadata_key_hash);
-
-            let metadata_value = load_metadata_value(metadata_value_hash);
             metadata_values.push(metadata_value);
             i += 1;
         }
