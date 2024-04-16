@@ -57,7 +57,7 @@ impl MyContract for Contract {
 
     #[storage(read)]
     fn get(handle_name: String, key: String) -> String {
-        return storage.metadata.get(handle_name, key)
+        return storage.metadata.get(handle_name, key);
     }
 
     #[storage(read)]
