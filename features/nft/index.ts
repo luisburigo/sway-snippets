@@ -31,9 +31,6 @@ async function main() {
     const assetId = registerCallResult.value;
     console.log('Asset ID: ', assetId);
 
-    await contractABI.functions.set_name(assetId, 'Pixel NFT').txParams(txParams).call();
-    await contractABI.functions.set_symbol(assetId, 'PNFT').txParams(txParams).call();
-
     // Get nft name
     const nftName = await contractABI
         .functions

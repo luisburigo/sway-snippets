@@ -35,8 +35,6 @@ storage {
     total_assets: u64 = 0,
     total_supply: StorageMap<AssetId, u64> = StorageMap {},
     metadata: StorageMetadata = StorageMetadata {},
-    name: StorageMap<AssetId, StorageString> = StorageMap {},
-    symbol: StorageMap<AssetId, StorageString> = StorageMap {},
 
     // PixelNFT
     names: StorageMap<b256, StorageString> = StorageMap {},
@@ -83,9 +81,6 @@ impl PixelNFTContract for Contract {
         let image_url_value = concat_string(String::from_ascii_str("http://localhost:3002/"), name);
         storage.metadata.insert(asset, image_url_key, Metadata::Bytes(image_url_value.into()));
 
-        // _set_name(storage.name, asset, String::from_ascii_str("PixelNFT"));
-        // _set_symbol(storage.symbol, asset, String::from_ascii_str("PNFT"));
-
         return asset;
     }
 }
@@ -103,14 +98,12 @@ impl SRC20 for Contract {
 
     #[storage(read)]
     fn name(asset: AssetId) -> Option<String> {
-        log(asset);
-        log(storage.name.get(asset).try_read().is_none());
-        return _name(storage.name, asset)
+        Some(String::from_ascii_str("Pixel NFT"))
     }
 
     #[storage(read)]
     fn symbol(asset: AssetId) -> Option<String> {
-        _symbol(storage.symbol, asset)
+         Some(String::from_ascii_str("PNFT"))
     }
 
     #[storage(read)]
@@ -123,23 +116,6 @@ impl SRC7 for Contract {
     #[storage(read)]
     fn metadata(asset: AssetId, key: String) -> Option<Metadata> {
         storage.metadata.get(asset, key)
-    }
-}
-
-impl SetAssetAttributes for Contract {
-    #[storage(write)]
-    fn set_name(asset: AssetId, name: String) {
-        _set_name(storage.name, asset, name);
-    }
-    
-    #[storage(write)]
-    fn set_symbol(asset: AssetId, symbol: String) {
-        _set_symbol(storage.symbol, asset, symbol);
-    }
-
-    #[storage(write)]
-    fn set_decimals(asset: AssetId, decimals: u8) {
-        
     }
 }
 

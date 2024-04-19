@@ -4,7 +4,7 @@
 /* eslint-disable */
 
 /*
-  Fuels version: 0.81.0
+  Fuels version: 0.79.0
   Forc version: 0.49.3
   Fuel-Core version: 0.22.1
 */
@@ -41,9 +41,6 @@ interface NftContractAbiInterface extends Interface {
     total_assets: FunctionFragment;
     total_supply: FunctionFragment;
     metadata: FunctionFragment;
-    set_decimals: FunctionFragment;
-    set_name: FunctionFragment;
-    set_symbol: FunctionFragment;
   };
 
   encodeFunctionData(functionFragment: 'register', values: [StdString]): Uint8Array;
@@ -53,9 +50,6 @@ interface NftContractAbiInterface extends Interface {
   encodeFunctionData(functionFragment: 'total_assets', values: []): Uint8Array;
   encodeFunctionData(functionFragment: 'total_supply', values: [AssetIdInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'metadata', values: [AssetIdInput, StdString]): Uint8Array;
-  encodeFunctionData(functionFragment: 'set_decimals', values: [AssetIdInput, BigNumberish]): Uint8Array;
-  encodeFunctionData(functionFragment: 'set_name', values: [AssetIdInput, StdString]): Uint8Array;
-  encodeFunctionData(functionFragment: 'set_symbol', values: [AssetIdInput, StdString]): Uint8Array;
 
   decodeFunctionData(functionFragment: 'register', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'decimals', data: BytesLike): DecodedValue;
@@ -64,9 +58,6 @@ interface NftContractAbiInterface extends Interface {
   decodeFunctionData(functionFragment: 'total_assets', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'total_supply', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'metadata', data: BytesLike): DecodedValue;
-  decodeFunctionData(functionFragment: 'set_decimals', data: BytesLike): DecodedValue;
-  decodeFunctionData(functionFragment: 'set_name', data: BytesLike): DecodedValue;
-  decodeFunctionData(functionFragment: 'set_symbol', data: BytesLike): DecodedValue;
 }
 
 export class NftContractAbi extends Contract {
@@ -79,8 +70,5 @@ export class NftContractAbi extends Contract {
     total_assets: InvokeFunction<[], BN>;
     total_supply: InvokeFunction<[asset: AssetIdInput], Option<BN>>;
     metadata: InvokeFunction<[asset: AssetIdInput, key: StdString], Option<MetadataOutput>>;
-    set_decimals: InvokeFunction<[asset: AssetIdInput, decimals: BigNumberish], void>;
-    set_name: InvokeFunction<[asset: AssetIdInput, name: StdString], void>;
-    set_symbol: InvokeFunction<[asset: AssetIdInput, symbol: StdString], void>;
   };
 }
