@@ -8,7 +8,7 @@ importers:
 
   .: {}
 
-  feats/metadata-bytes:
+  features/metadata-bytes:
     dependencies:
       fuels:
         specifier: ^0.79.0
@@ -18,7 +18,7 @@ importers:
         specifier: ^10.9.2
         version: 10.9.2(@types/node@20.12.7)(typescript@5.4.5)
 
-  feats/metadata-map:
+  features/metadata-map:
     dependencies:
       fuels:
         specifier: ^0.79.0
@@ -28,7 +28,7 @@ importers:
         specifier: ^10.9.2
         version: 10.9.2(@types/node@20.12.7)(typescript@5.4.5)
 
-  feats/metadata-storage:
+  features/metadata-storage:
     dependencies:
       fuels:
         specifier: ^0.79.0
@@ -37,6 +37,19 @@ importers:
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@types/node@20.12.7)(typescript@5.4.5)
+
+  features/nft:
+    dependencies:
+      fuels:
+        specifier: 0.79.0
+        version: 0.79.0(dexie@4.0.4)
+    devDependencies:
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@types/node@20.12.7)(typescript@5.4.5)
+      typescript:
+        specifier: ^5.4.5
+        version: 5.4.5
 
 packages:
 
