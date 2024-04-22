@@ -10,5 +10,7 @@
 */
 
 export type { NftContractAbi } from './NftContractAbi';
+export type { NftContractMetadataAbi } from './NftContractMetadataAbi';
 
 export { NftContractAbi__factory } from './factories/NftContractAbi__factory';
+export { NftContractMetadataAbi__factory } from './factories/NftContractMetadataAbi__factory';

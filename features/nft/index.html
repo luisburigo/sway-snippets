@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>asd</title>
+</head>
+<body style="background: black">
+<button id="#mint">mint</button>
+</body>
+<script type="module">
+    import {Fuel} from "@fuel-wallet/sdk";
+    import {NftContractMetadataAbi__factory} from './types'
+    import {nftContractMetadata} from './types/contract-ids.json'
+
+    const fuel = new Fuel();
+
+    document.getElementById('#mint').addEventListener('click', async () => {
+        await fuel.connect();
+        const fuelWalletLocked = await fuel.getWallet(await fuel.currentAccount());
+
+        const contractAbi = NftContractMetadataAbi__factory.connect(nftContractMetadata, fuelWalletLocked);
+
+        const registerResult = await contractAbi.functions.register('my_handle').call();
+        const assetId = registerResult.value;
+
+        const assetName = await contractAbi.functions.name(assetId).get();
+        const assetSymbol = await contractAbi.functions.symbol(assetId).get();
+
+        const imageUrlResult = await contractAbi.functions.image_url(assetId).get();
+        const imageUrl = imageUrlResult.value;
+
+        const imageElement = new Image();
+        imageElement.src = imageUrl;
+
+        const nftInfos = document.createElement('div');
+        nftInfos.style.color = 'white';
+        nftInfos.innerText = `
+            Asset ID: ${assetId.value}
+            Image URL: ${imageUrl}
+            Name: ${assetName.value}
+            Symbol: ${assetSymbol.value}
+        `;
+
+        document.body.appendChild(imageElement);
+        document.body.appendChild(nftInfos);
+    });
+</script>
+</html>

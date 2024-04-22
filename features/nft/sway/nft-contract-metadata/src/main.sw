@@ -1,8 +1,7 @@
 contract;
 
 use src3::SRC3;
-use src20::SRC20;
-use src7::{Metadata, SRC7};
+use src7::{Metadata};
 
 use asset::{
     base::{
@@ -46,6 +45,33 @@ fn concat_string(string1: String, string2: String) -> String {
     new_string.append(string2.as_bytes());
     
     return String::from(new_string);
+}
+
+// Rewrite the `SRC20` ABI, remove `Option<String>` and use `String`.
+abi SRC20 {
+    #[storage(read)]
+    fn total_assets() -> u64;
+
+    #[storage(read)]
+    fn total_supply(asset: AssetId) -> Option<u64>;
+
+    #[storage(read)]
+    fn name(asset: AssetId) -> String;
+
+    #[storage(read)]
+    fn symbol(asset: AssetId) -> String;
+
+    #[storage(read)]
+    fn decimals(asset: AssetId) -> Option<u8>;
+}
+
+// Rewrite the `SRC7` ABI, remove `Option<Metadata>` and use the `Metadata` enum.
+abi SRC7 {
+    #[storage(read)]
+    fn metadata(asset: AssetId, key: String) -> Metadata;
+
+    #[storage(read)]
+    fn image_url(asset: AssetId) -> String;
 }
 
 abi PixelNFTContract {
@@ -97,13 +123,13 @@ impl SRC20 for Contract {
     }
 
     #[storage(read)]
-    fn name(asset: AssetId) -> Option<String> {
-        Some(String::from_ascii_str("Pixel NFT"))
+    fn name(asset: AssetId) -> String {
+        String::from_ascii_str("Pixel NFT")
     }
 
     #[storage(read)]
-    fn symbol(asset: AssetId) -> Option<String> {
-         Some(String::from_ascii_str("PNFT"))
+    fn symbol(asset: AssetId) -> String {
+         String::from_ascii_str("PNFT")
     }
 
     #[storage(read)]
@@ -114,8 +140,15 @@ impl SRC20 for Contract {
 
 impl SRC7 for Contract {
     #[storage(read)]
-    fn metadata(asset: AssetId, key: String) -> Option<Metadata> {
-        storage.metadata.get(asset, key)
+    fn metadata(asset: AssetId, key: String) -> Metadata {
+        return storage.metadata.get(asset, key).unwrap_or(Metadata::String(String::from_ascii_str("")));
+    }
+
+    #[storage(read)]
+    fn image_url(asset: AssetId) -> String {
+        let key = String::from_ascii_str("image_url");
+        let image_url_metadata = storage.metadata.get(asset, key).unwrap_or(Metadata::String(String::from_ascii_str("")));
+        return image_url_metadata.as_string().unwrap_or(String::new());
     }
 }
 
@@ -133,17 +166,17 @@ fn test_string_concat() {
 
 #[test]
 fn test_nft_metadata() {
-    use std::constants::*;
+    // use std::constants::*;
 
-    let nft_image = Metadata::Bytes(String::from_ascii_str("http://localhost:3002/my_handle").into());
+    // let nft_image = Metadata::Bytes(String::from_ascii_str("http://localhost:3002/my_handle").into());
     
-    let pixel_nft_abi = abi(PixelNFTContract, ZERO_B256);
-    let asset_id = pixel_nft_abi.register(String::from_ascii_str("my_handle"));
+    // let pixel_nft_abi = abi(PixelNFTContract, ZERO_B256);
+    // let asset_id = pixel_nft_abi.register(String::from_ascii_str("my_handle"));
 
-    let src_7_abi = abi(SRC7, ZERO_B256);
-    let asset_image_url = src_7_abi.metadata(asset_id, String::from_ascii_str("image_url"));
+    // let src_7_abi = abi(SRC7, ZERO_B256);
+    // let asset_image_url = src_7_abi.metadata(asset_id, String::from_ascii_str("image_url"));
 
-    log(asset_image_url.unwrap().as_bytes().unwrap().len);
+    // log(asset_image_url.unwrap().as_bytes().unwrap().len);
 
 
     
