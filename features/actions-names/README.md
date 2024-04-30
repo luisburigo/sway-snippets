@@ -66,6 +66,6 @@ storage {
     - The second part after the `/` is the metadata key.
     - `fn action_split(action: String) -> (String, String)`.
   - Converts the two strings to `sha256(key + name)` and searches for the metadata.
-  - Executes the [Contrato](#action-executor) with the saved id.
+  - Executes the [Contract](#action-executor) with the saved id.
     - `abi(ActionExecutorAbi, metadata_value)`. 
   - Saves in the storage the execution date of the action.
